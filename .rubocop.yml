@@ -1,0 +1,9 @@
+AllCops:
+  TargetRubyVersion: 2.6
+
+Metrics/LineLength:
+  Max: 110
+
+AllCops:
+  Exclude:
+    - modules/**/*
