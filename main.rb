@@ -143,13 +143,13 @@ end
 
 # $1 is an array of hashes with certname + OS
 # $2 is an array of hashes with certname + major OS version
-def nodes_with_os_and_version(nodes_with_operatingsystem, nodes_with_operatingsystemmajrelease)
+def nodes_with_os_and_version(operatingsystems, operatingsystemmajreleases)
   nodes_with_os_and_version = {}
-  nodes_with_operatingsystem.each do |server|
+  operatingsystems.each do |server|
     os = server['value']
     # get the operating system major version for the current server
     # `find` returns an hash. We only want the `value` key
-    os_version = nodes_with_operatingsystemmajrelease.find { |node| node['certname'] == server['certname'] }['value']
+    os_version = operatingsystemmajreleases.find { |node| node['certname'] == server['certname'] }['value']
     # naming schema is `OS`-`Majorversion`
     # Except for rolling releases Like Arch and Gentoo
     rolling = %w[Archlinux Gentoo]
@@ -184,10 +184,10 @@ def generate_os_version_names(metadatas)
     os_version_names = if metadata['operatingsystem_support']
                          data = metadata['operatingsystem_support'].map do |os|
                            if os['operatingsystemrelease'].nil?
-                             if ['Gentoo', 'Archlinux'].include?(os['operatingsystem'])
+                             if %w[Gentoo Archlinux].include?(os['operatingsystem'])
                                [os['operatingsystem']]
                              else
-                             []
+                               []
                              end
                            else
                              os['operatingsystemrelease'].map { |rel| "#{os['operatingsystem']}-#{rel}" }
@@ -244,7 +244,7 @@ def all_used_modules_on_one_server(certname, client)
   modules = classes.map { |data| data['title'].split('::')[0].downcase }.uniq.sort
 
   # remove classes that aren't modules
-  modules -= %w[main settings]
+  modules - %w[main settings]
 end
 
 # $1 = A Hash. Each key is an OS, Each value an array of used modules on that OS
