@@ -157,7 +157,10 @@ end
 # We want to have links to the repos in the markdown table
 def get_all_modules_with_links(all_modules, metadatas)
   all_modules.map do |modul|
-    (puts "Modul #{modul} is missing in the modules/ dir, but it's present in a catalog!"; next) if metadatas[modul].nil?
+    if metadatas[modul].nil?
+      puts "Modul #{modul} is missing in the modules/ dir, but it's present in a catalog!"
+      next
+    end
     name = metadatas[modul]['name'].nil? ? name : metadatas[modul]['name']
     if metadatas[modul]['project_page'].nil?
       name
@@ -194,8 +197,8 @@ end
 def init
   debug = ENV['DEBUG'] || false
   # we assume that all modules are deployed via r10k to `./modules/`
-  currentDir = Dir.pwd
-  metadatas = modules_metadata("#{currentDir}/modules")
+  current_dir = Dir.pwd
+  metadatas = modules_metadata("#{current_dir}/modules")
   metadatas_enhanced = generate_os_version_names(metadatas)
   p metadatas_enhanced if debug
   homedir = Dir.home
@@ -205,7 +208,7 @@ def init
   labels = os_module_hash.keys
   labels = ['Modules \ OS'] + labels
   all_modules = os_module_hash.map { |os| os[1] }.flatten.sort.uniq
-  puts "All modules in the environment: #{all_modules.join(", ")}" if debug
+  puts "All modules in the environment: #{all_modules.join(', ')}" if debug
   data = render_master_markdown(os_module_hash, all_modules, metadatas_enhanced)
   table = MarkdownTables.make_table(labels, data)
   File.open('module_os_matrix_complete.md', 'w') { |file| file.write("#{table}\n") }
