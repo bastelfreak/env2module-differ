@@ -116,7 +116,7 @@ rm ~/.cache/env2module-differ/cache.yaml
 ## Example output
 
 |Modules \ OS|CentOS-7|Fedora-31|Archlinux|Ubuntu-16.04|CentOS-6|Fedora-30|FreeBSD-12|Debian-9|CentOS-8|RedHat-6|
-|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 |[puppetlabs-apache](https://github.com/puppetlabs/puppetlabs-apache)|used|not used|not used|used|not used|not used|not used|not used|not used|not used|
 |[puppetlabs-apt](https://github.com/puppetlabs/puppetlabs-apt)|not used|not used|not used|used|not used|not used|not used|used|not used|not used|
 |[puppet-archive](https://github.com/voxpupuli/puppet-archive)|used|incomplete|not used|used|not used|incomplete|not used|not used|used|not used|
