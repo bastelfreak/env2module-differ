@@ -54,7 +54,7 @@ Please ensure that:
 We also need to install some gems:
 
 ```
-bundle install --path .vendor/ --jobs "$(nproc)"
+bundle install --path .vendor/ --jobs "$(nproc)" --without r10k
 ```
 
 If we not only want to generate a table with all modules, but also compare the
@@ -67,7 +67,41 @@ If you use r10k, but don't have all modules locally, you can get them with:
 r10k puppetfile install --moduledir './modules/' --puppetfile /path/to/Puppetfile
 ```
 
+You can install r10k via your system package manager or download it from the
+[puppet.com](https://puppet.com) website. For convenience we also have it in
+our Gemfile. If you want to install it, please do:
+
+```
+bundle install --path .vendor/ --jobs "$(nproc)" --with r10k
+```
+
+If you want to use r10k installed through bundle, use it like this:
+
+```
+bundle exec r10k puppetfile install --moduledir './modules/' --puppetfile /path/to/Puppetfile
+```
+
 ## Usage
+
+To generate the full markdown table you need to populate the methods from the
+main.rb into your env and afterwards execute this:
+
+```ruby
+metadatas = modules_metadata('/home/bastelfreak/env2module-differ/modules')
+metadatas_enhanced = generate_os_version_names(metadatas)
+homedir = Dir.home
+cachedir = "#{homedir}/.cache/env2module-differ"
+client = PuppetDB::Client.new
+os_module_hash = all_used_modules(cachedir, client)
+labels = os_module_hash.keys
+labels = ['Modules \ OS'] + labels
+all_modules = os_module_hash.map { |os| os[1] }.flatten.sort.uniq
+data = render_master_markdown(os_module_hash, all_modules, metadatas_enhanced)
+table = MarkdownTables.make_table(labels, data)
+File.open('module_os_matrix_complete.md', 'w') { |file| file.write(table) }
+```
+
+This will generate you the `module_os_matrix_complete.md` file.
 
 ## Limitations
 

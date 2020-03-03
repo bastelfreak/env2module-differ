@@ -10,3 +10,7 @@ group :development do
   gem 'pry'
   gem 'rubocop'
 end
+
+group :r10k do
+  gem 'r10k'
+end

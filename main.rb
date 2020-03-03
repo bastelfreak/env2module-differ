@@ -121,10 +121,14 @@ end
 new_table = MarkdownTables.make_table(labels, new_data)
 File.open('module_os_matrix_big.md', 'w') { |file| file.write(new_table) }
 
-def write_cache(cachedir, _data)
-  File.write("#{cachedir}/cache.yaml", final_data.to_yaml)
+# $1 is the directory for the cache file
+# $2 is the data we want to store
+def write_cache(cachedir, data)
+  Dir.mkdir cachedir unless File.exist? cachedir
+  File.write("#{cachedir}/cache.yaml", data.to_yaml)
 end
 
+# if the cache doesn't exist, we query the PuppetDB
 def load_cache(cachedir)
   YAML.safe_load(File.open("#{cachedir}/cache.yaml"))
 end
@@ -143,7 +147,7 @@ end
 
 # $1 is an array of hashes with certname + OS
 # $2 is an array of hashes with certname + major OS version
-def nodes_with_os_and_version(operatingsystems, operatingsystemmajreleases)
+def merge_os_and_version_hashes(operatingsystems, operatingsystemmajreleases)
   nodes_with_os_and_version = {}
   operatingsystems.each do |server|
     os = server['value']
@@ -160,6 +164,66 @@ def nodes_with_os_and_version(operatingsystems, operatingsystemmajreleases)
                                                     end
   end
   nodes_with_os_and_version
+end
+
+# $1 is the PuppetDB client
+def nodes_with_os_and_version(client)
+  operatingsystems = all_nodes_with_os(client)
+  operatingsystemmajreleases = all_nodes_with_os_major_version(client)
+  merge_os_and_version_hashes(operatingsystems, operatingsystemmajreleases)
+end
+
+# $1 is the common name from a valid agent certificate
+# $2 is the PuppetDB client object
+def all_used_modules_on_one_server(certname, client)
+  # get a catalog for this common name
+  catalog = client.request('catalogs', [:"=", 'certname', certname])
+
+  # get all classes
+  resources = catalog.data.first['resources']['data']
+  # requires ruby2.7
+  # modules = resources.filter_map{|data| data['title'].split('::')[0] if data['type'] == 'Class'}
+
+  # Get all resources that are classes
+  classes = resources.filter { |data| data['type'] == 'Class' }
+  # Get all top level modules, ignore subclasses
+  modules = classes.map { |data| data['title'].split('::')[0].downcase }.uniq.sort
+
+  # remove classes that aren't modules
+  modules - %w[main settings]
+end
+
+# $1 is the return value from nodes_with_os_and_version()
+# $2 is the PuppetDB client
+def all_used_modules_from_puppetdb(nodes_with_os_and_version, client)
+  final_data = {}
+  nodes_with_os_and_version.each do |certname, os|
+    puts certname
+    modules = all_used_modules_on_one_server(certname, client)
+    puts "processed: #{certname} with #{modules.count} modules on #{os}"
+    puts modules.join(', ')
+
+    # ensure that our final array contains a hash for that OS-Version combination
+    final_data[os] = [] unless final_data[os]
+    final_data[os] = (final_data[os] + modules)
+  end
+  final_data
+end
+
+# $1 is the path to the cache file
+# $2 is the PuppetDB client object
+def all_used_modules(cachedir, client)
+  begin
+    # load local YAML cache if it exists
+    os_module_hash = load_cache(cachedir)
+  rescue Errno::ENOENT
+    # Query PuppetDB because we don't have any cache
+    # Update our Cache and return the value afterwards
+    response = nodes_with_os_and_version(client)
+    os_module_hash = all_used_modules_from_puppetdb(response, client)
+    write_cache(cachedir, os_module_hash)
+  end
+  os_module_hash
 end
 
 def modules_metadata(path)
@@ -214,39 +278,6 @@ def get_all_modules_with_links(all_modules, metadatas)
   end
 end
 
-def all_used_modules(nodes_with_os_and_version)
-  final_data = {}
-  nodes_with_os_and_version.each do |certname, os|
-    modules = all_used_modules_on_one_server(certname)
-    puts "processed: #{certname} with #{modules.count} modules on #{os}"
-    puts modules.join(', ')
-
-    # ensure that our final array contains a hash for that OS-Version combination
-    final_data[os] = [] unless final_data[os]
-    final_data[os] = (final_data[os] + modules)
-  end
-end
-
-# $1 is the common name from a valid agent certificate
-# $2 is the PuppetDB client object
-def all_used_modules_on_one_server(certname, client)
-  # get a catalog for this common name
-  catalog = client.request('catalogs', [:"=", 'certname', certname])
-
-  # get all classes
-  resources = catalog.data.first['resources']['data']
-  # requires ruby2.7
-  # modules = resources.filter_map{|data| data['title'].split('::')[0] if data['type'] == 'Class'}
-
-  # Get all resources that are classes
-  classes = resources.filter { |data| data['type'] == 'Class' }
-  # Get all top level modules, ignore subclasses
-  modules = classes.map { |data| data['title'].split('::')[0].downcase }.uniq.sort
-
-  # remove classes that aren't modules
-  modules - %w[main settings]
-end
-
 # $1 = A Hash. Each key is an OS, Each value an array of used modules on that OS
 # $2 = an array with all used modules (NOT all modules in the environment)
 # $3 = all metadatas in a hash, extended
@@ -270,16 +301,3 @@ def render_master_markdown(os_module_hash, all_modules, metadatas)
   end
   new_data
 end
-
-# to generate the full table (only with used modules, not *all* modules in an env)
-# metadatas = modules_metadata('/home/bastelfreak/env2module-differ/modules')
-# metadatas_enhanced = generate_os_version_names(metadatas)
-# homedir = Dir.home
-# cachedir = "#{homedir}/.cache/env2module-differ"
-# os_module_hash = load_cache(cachedir)
-# labels = final_data.keys
-# labels = ['Modules \ OS'] + labels
-# all_modules = final_data.map { |os| os[1] }.flatten.sort.uniq
-# data = render_master_markdown(os_module_hash, all_modules, metadatas_enhanced)
-# table = MarkdownTables.make_table(labels, data)
-# File.open('module_os_matrix_complete.md', 'w') { |file| file.write(table) }
