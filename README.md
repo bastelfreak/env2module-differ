@@ -115,30 +115,30 @@ rm ~/.cache/env2module-differ/cache.yaml
 
 ## Example output
 
-|Modules \ OS|CentOS-7|Fedora-31|Archlinux|Ubuntu-16.04|CentOS-6|Fedora-30|FreeBSD-12|Debian-9|CentOS-8|RedHat-6|
-|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|[puppetlabs-apache](https://github.com/puppetlabs/puppetlabs-apache)|used|not used|not used|used|not used|not used|not used|not used|not used|not used|
-|[puppetlabs-apt](https://github.com/puppetlabs/puppetlabs-apt)|not used|not used|not used|used|not used|not used|not used|used|not used|not used|
-|[puppet-archive](https://github.com/voxpupuli/puppet-archive)|used|incomplete|not used|used|not used|incomplete|not used|not used|used|not used|
-|[puppet-bird](https://github.com/voxpupuli/puppet-bird/)|used|not used|used|not used|not used|not used|not used|not used|not used|not used|
-|[puppet-borg](https://github.com/voxpupuli/puppet-borg)|used|used|used|used|not used|used|not used|not used|incomplete|not used|
-|[openstack-ceph](https://launchpad.net/puppet-ceph)|incomplete|not used|not used|not used|not used|not used|not used|not used|not used|not used|
-|[choria-choria](https://github.com/choria-io/puppet-choria)|incomplete|incomplete|used|incomplete|not used|incomplete|used|not used|incomplete|used|
-|[puppet-collectd](https://github.com/voxpupuli/puppet-collectd)|used|not used|not used|not used|not used|not used|not used|not used|not used|not used|
-|[KyleAnderson-consul](https://github.com/solarkennedy/puppet-consul)|incomplete|not used|used|incomplete|used|used|not used|incomplete|incomplete|not used|
-|[puppet-cron](https://github.com/voxpupuli/puppet-cron)|incomplete|incomplete|used|incomplete|not used|incomplete|used|incomplete|incomplete|used|
-|[puppet-dhcp](https://github.com/voxpupuli/puppet-dhcp)|not used|not used|not used|not used|used|not used|not used|not used|not used|not used|
-|[garethr-docker](https://github.com/garethr/garethr-docker)|not used|not used|not used|not used|used|not used|not used|not used|not used|not used|
-|[puppet-ferm](https://github.com/voxpupuli/puppet-ferm)|incomplete|incomplete|used|incomplete|used|used|used|incomplete|incomplete|used|
-|[theforeman-foreman](https://github.com/theforeman/puppet-foreman)|not used|not used|used|not used|not used|not used|not used|not used|not used|not used|
-|[theforeman-foreman_proxy](https://github.com/theforeman/puppet-foreman_proxy)|not used|not used|used|not used|not used|not used|not used|not used|not used|not used|
-|[puppetlabs-git](https://github.com/puppetlabs/puppetlabs-git)|used|incomplete|incomplete|incomplete|used|incomplete|incomplete|not used|incomplete|used|
-|[puppet-grafana](https://github.com/voxpupuli/puppet-grafana)|not used|not used|used|not used|not used|not used|not used|not used|not used|not used|
-|[puppetlabs-haproxy](https://github.com/puppetlabs/puppetlabs-haproxy)|used|not used|used|not used|not used|not used|not used|not used|not used|not used|
-|[puppet-ipset](https://github.com/voxpupuli/puppet-ipset)|used|incomplete|used|used|used|incomplete|not used|not used|used|used|
-|[camptocamp-kmod](https://github.com/camptocamp/puppet-kmod)|incomplete|incomplete|used|incomplete|incomplete|incomplete|not used|not used|incomplete|used|
-|[cirrax-libvirt](https://github.com/cirrax/puppet-libvirt)|not used|not used|not used|not used|not used|not used|not used|not used|not used|not used|
-|[puppet-lldpd](https://github.com/voxpupuli/puppet-lldpd)|used|incomplete|used|used|used|incomplete|incomplete|not used|incomplete|used|
+|Modules \ OS|CentOS-7|Fedora-31|Archlinux|CentOS-6|Fedora-30|FreeBSD-12|Debian-9|CentOS-8|RedHat-6|
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+|[puppetlabs-apache](https://github.com/puppetlabs/puppetlabs-apache)|used|not used|not used|used|not used|not used|not used|not used|not used|
+|[puppetlabs-apt](https://github.com/puppetlabs/puppetlabs-apt)|not used|not used|not used|used|not used|not used|not used|used|not used|
+|[puppet-archive](https://github.com/voxpupuli/puppet-archive)|used|incomplete|not used|used|not used|incomplete|not used|not used|used|
+|[puppet-bird](https://github.com/voxpupuli/puppet-bird/)|used|not used|used|not used|not used|not used|not used|not used|not used|
+|[puppet-borg](https://github.com/voxpupuli/puppet-borg)|used|used|used|used|not used|used|not used|not used|incomplete|
+|[openstack-ceph](https://launchpad.net/puppet-ceph)|incomplete|not used|not used|not used|not used|not used|not used|not used|not used|
+|[choria-choria](https://github.com/choria-io/puppet-choria)|incomplete|incomplete|used|incomplete|not used|incomplete|used|not used|incomplete|
+|[puppet-collectd](https://github.com/voxpupuli/puppet-collectd)|used|not used|not used|not used|not used|not used|not used|not used|not used|
+|[KyleAnderson-consul](https://github.com/solarkennedy/puppet-consul)|incomplete|not used|used|incomplete|used|used|not used|incomplete|incomplete|
+|[puppet-cron](https://github.com/voxpupuli/puppet-cron)|incomplete|incomplete|used|incomplete|not used|incomplete|used|incomplete|incomplete|
+|[puppet-dhcp](https://github.com/voxpupuli/puppet-dhcp)|not used|not used|not used|not used|used|not used|not used|not used|not used|
+|[garethr-docker](https://github.com/garethr/garethr-docker)|not used|not used|not used|not used|used|not used|not used|not used|not used|
+|[puppet-ferm](https://github.com/voxpupuli/puppet-ferm)|incomplete|incomplete|used|incomplete|used|used|used|incomplete|incomplete|
+|[theforeman-foreman](https://github.com/theforeman/puppet-foreman)|not used|not used|used|not used|not used|not used|not used|not used|not used|
+|[theforeman-foreman_proxy](https://github.com/theforeman/puppet-foreman_proxy)|not used|not used|used|not used|not used|not used|not used|not used|not used|
+|[puppetlabs-git](https://github.com/puppetlabs/puppetlabs-git)|used|incomplete|incomplete|incomplete|used|incomplete|incomplete|not used|incomplete|
+|[puppet-grafana](https://github.com/voxpupuli/puppet-grafana)|not used|not used|used|not used|not used|not used|not used|not used|not used|
+|[puppetlabs-haproxy](https://github.com/puppetlabs/puppetlabs-haproxy)|used|not used|used|not used|not used|not used|not used|not used|not used|
+|[puppet-ipset](https://github.com/voxpupuli/puppet-ipset)|used|incomplete|used|used|used|incomplete|not used|not used|used|
+|[camptocamp-kmod](https://github.com/camptocamp/puppet-kmod)|incomplete|incomplete|used|incomplete|incomplete|incomplete|not used|not used|incomplete|
+|[cirrax-libvirt](https://github.com/cirrax/puppet-libvirt)|not used|not used|not used|not used|not used|not used|not used|not used|not used|
+|[puppet-lldpd](https://github.com/voxpupuli/puppet-lldpd)|used|incomplete|used|used|used|incomplete|incomplete|not used|incomplete|
 
 ## Questions and Feedback
 
