@@ -9,118 +9,6 @@ require 'puppetdb'
 require 'markdown-tables'
 require 'yaml'
 
-# ensure we've a persistent cache directory
-homedir = Dir.home
-cachedir = "#{homedir}/.cache/env2module-differ"
-Dir.mkdir cachedir unless File.exist? cachedir
-
-# establish a connection to PuppetDB
-# only works if you have ~/.puppetlabs/client-tools/puppetdb.conf
-client = PuppetDB::Client.new
-
-# get all nodes + operatingsystem and operatingsystemmajrelease fact
-response = client.request('facts', [:'=', 'name', 'operatingsystem'])
-nodes_with_operatingsystem = response.data
-response = client.request('facts', [:'=', 'name', 'operatingsystemmajrelease'])
-nodes_with_operatingsystemmajrelease = response.data
-
-puts "We've got #{nodes_with_operatingsystem.count} systems in our environment"
-
-# merge FQDN + facts into one Hash
-nodes_with_os_and_version = {}
-nodes_with_operatingsystem.each do |server|
-  os = server['value']
-  # get the operating system major version for the current server
-  os_array = nodes_with_operatingsystemmajrelease.select { |node| node['certname'] == server['certname'] }
-  os_version = os_array.first['value']
-  # naming schema is OS-Majorversion
-  # Except for rolling releases Like Arch and Gentoo
-  rolling = %w[Archlinux Gentoo]
-  nodes_with_os_and_version[server['certname']] = if rolling.include?(server['value'])
-                                                    os
-                                                  else
-                                                    "#{os}-#{os_version}"
-                                                  end
-end
-
-os_array = nodes_with_os_and_version.values.uniq.sort
-os_strings = os_array.join(', ')
-os_array_amount = os_array.count
-puts "We've the following Operating Systems: #{os_strings} (#{os_array_amount})"
-
-final_data = {}
-
-nodes_with_os_and_version.each do |server|
-  # get the common name
-  certname = server[0]
-  # get the os / release string
-  os = server[1]
-  # get a catalog for this common name
-  catalog = client.request('catalogs', [:"=", 'certname', certname])
-
-  # get all classes
-  resources = catalog.data.first['resources']['data']
-  # requires ruby2.7
-  # modules = resources.filter_map{|data| data['title'].split('::')[0] if data['type'] == 'Class'}
-
-  # Get all resources that are classes
-  classes = resources.filter { |data| data['type'] == 'Class' }
-  # Get all top level modules, ignore subclasses
-  modules = classes.map { |data| data['title'].split('::')[0].downcase }.uniq
-
-  # remove classes that aren't modules
-  modules -= %w[main settings]
-  puts "processed: #{certname} with #{modules.count} modules on #{os}"
-  puts modules.join(', ')
-
-  # ensure that our final array contains a hash for that OS-Version combination
-  final_data[os] = [] unless final_data[os]
-  final_data[os] = (final_data[os] + modules).uniq.sort
-end
-
-# plot a markdown table to a file
-labels = final_data.keys
-data = final_data.map { |os| os[1] }
-table = MarkdownTables.make_table(labels, data)
-
-File.open('module_os_matrix.md', 'w') { |file| file.write(table) }
-
-## create a more readable table
-all_modules = data.flatten.uniq.sort
-labels = ['Modules \ OS'] + labels
-new_data = []
-# first column with _all_ modules
-new_data << all_modules
-# now create one array per os-specific column
-data.each do |module_array|
-  new_column = []
-  all_modules.each do |modul|
-    new_column << if module_array.include?(modul)
-                    modul
-                  else
-                    ''
-                  end
-  end
-  new_data << new_column
-end
-
-## for our master table
-new_data = []
-data.each do |module_array|
-  new_column = []
-  all_modules.each do |modul|
-    new_column << if module_array.include?(modul)
-                    modul
-                  else
-                    ''
-                  end
-  end
-  new_data << new_column
-end
-
-new_table = MarkdownTables.make_table(labels, new_data)
-File.open('module_os_matrix_big.md', 'w') { |file| file.write(new_table) }
-
 # $1 is the directory for the cache file
 # $2 is the data we want to store
 def write_cache(cachedir, data)
@@ -266,9 +154,10 @@ def generate_os_version_names(metadatas)
   metadatas
 end
 
-# We wan't to have links to the repos in the markdown table
+# We want to have links to the repos in the markdown table
 def get_all_modules_with_links(all_modules, metadatas)
   all_modules.map do |modul|
+    (puts "Modul #{modul} is missing in the modules/ dir, but it's present in a catalog!"; next) if metadatas[modul].nil?
     name = metadatas[modul]['name'].nil? ? name : metadatas[modul]['name']
     if metadatas[modul]['project_page'].nil?
       name
@@ -301,3 +190,25 @@ def render_master_markdown(os_module_hash, all_modules, metadatas)
   end
   new_data
 end
+
+def init
+  debug = ENV['DEBUG'] || false
+  # we assume that all modules are deployed via r10k to `./modules/`
+  currentDir = Dir.pwd
+  metadatas = modules_metadata("#{currentDir}/modules")
+  metadatas_enhanced = generate_os_version_names(metadatas)
+  p metadatas_enhanced if debug
+  homedir = Dir.home
+  cachedir = "#{homedir}/.cache/env2module-differ"
+  client = PuppetDB::Client.new
+  os_module_hash = all_used_modules(cachedir, client)
+  labels = os_module_hash.keys
+  labels = ['Modules \ OS'] + labels
+  all_modules = os_module_hash.map { |os| os[1] }.flatten.sort.uniq
+  puts "All modules in the environment: #{all_modules.join(", ")}" if debug
+  data = render_master_markdown(os_module_hash, all_modules, metadatas_enhanced)
+  table = MarkdownTables.make_table(labels, data)
+  File.open('module_os_matrix_complete.md', 'w') { |file| file.write("#{table}\n") }
+end
+
+init

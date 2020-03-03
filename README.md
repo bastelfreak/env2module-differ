@@ -64,7 +64,7 @@ to a directory that contains all modules.
 If you use r10k, but don't have all modules locally, you can get them with:
 
 ```sh
-r10k puppetfile install --moduledir './modules/' --puppetfile /path/to/Puppetfile
+r10k puppetfile install --moduledir './modules/' --puppetfile /path/to/Puppetfile --verbose info --color
 ```
 
 You can install r10k via your system package manager or download it from the
@@ -78,30 +78,34 @@ bundle install --path .vendor/ --jobs "$(nproc)" --with r10k
 If you want to use r10k installed through bundle, use it like this:
 
 ```
-bundle exec r10k puppetfile install --moduledir './modules/' --puppetfile /path/to/Puppetfile
+bundle exec r10k puppetfile install --moduledir './modules/' --puppetfile /path/to/Puppetfile --verbose info --color
 ```
 
 ## Usage
 
-To generate the full markdown table you need to populate the methods from the
-main.rb into your env and afterwards execute this:
+To generate the full markdown table you need to execute one command!
 
-```ruby
-metadatas = modules_metadata('/home/bastelfreak/env2module-differ/modules')
-metadatas_enhanced = generate_os_version_names(metadatas)
-homedir = Dir.home
-cachedir = "#{homedir}/.cache/env2module-differ"
-client = PuppetDB::Client.new
-os_module_hash = all_used_modules(cachedir, client)
-labels = os_module_hash.keys
-labels = ['Modules \ OS'] + labels
-all_modules = os_module_hash.map { |os| os[1] }.flatten.sort.uniq
-data = render_master_markdown(os_module_hash, all_modules, metadatas_enhanced)
-table = MarkdownTables.make_table(labels, data)
-File.open('module_os_matrix_complete.md', 'w') { |file| file.write(table) }
+```
+bundle exec ruby main.rb
 ```
 
 This will generate you the `module_os_matrix_complete.md` file.
+
+You can get a bit of debug output if you set an environment variable named
+`DEBUG`. The content of it doesn't matter.
+
+```
+DEBUG=foo bundle exec ruby main.rb
+```
+
+you need to deploy your modules to `./modules` as mentioned in the
+[Prerequirements](#prerequirements) section. Once this was successful, the
+script caches the PuppetDB catalogs because every PuppetDB API call is quite
+expensive. You can delete the cache with:
+
+```sh
+rm ~/.cache/env2module-differ/cache.yaml
+```
 
 ## Limitations
 
