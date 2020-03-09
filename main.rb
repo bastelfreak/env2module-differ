@@ -194,6 +194,12 @@ def render_master_markdown(os_module_hash, all_modules, metadatas)
   new_data
 end
 
+def cachedir
+  # https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+  xdg_cache_home = ENV['XDG_CACHE_HOME'] || File.join(Dir.home, '.cache')
+  File.join(xdg_cache_home, 'env2module-differ')
+end
+
 def init
   debug = ENV['DEBUG'] || false
   # we assume that all modules are deployed via r10k to `./modules/`
@@ -201,8 +207,6 @@ def init
   metadatas = modules_metadata("#{current_dir}/modules")
   metadatas_enhanced = generate_os_version_names(metadatas)
   p metadatas_enhanced if debug
-  homedir = Dir.home
-  cachedir = "#{homedir}/.cache/env2module-differ"
   client = PuppetDB::Client.new
   os_module_hash = all_used_modules(cachedir, client)
   labels = os_module_hash.keys
