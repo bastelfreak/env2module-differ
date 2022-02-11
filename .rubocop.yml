@@ -1,7 +1,14 @@
+inherit_from: .rubocop_todo.yml
+
 AllCops:
+  NewCops: enable
   TargetRubyVersion: 2.6
   Exclude:
     - modules/**/*
+    - vendor/**/*
+    - .vendor/**/*
 
-Metrics/LineLength:
+require: rubocop-rake
+
+Layout/LineLength:
   Max: 110
