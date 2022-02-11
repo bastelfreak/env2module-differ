@@ -65,7 +65,7 @@ end
 # $2 is the PuppetDB client object
 def all_used_modules_on_one_server(certname, client)
   # get a catalog for this common name
-  catalog = client.request('catalogs', [:"=", 'certname', certname])
+  catalog = client.request('catalogs', [:'=', 'certname', certname])
 
   # get all classes
   resources = catalog.data.first['resources']['data']
@@ -215,7 +215,7 @@ def init
   puts "All modules in the environment: #{all_modules.join(', ')}" if debug
   data = render_master_markdown(os_module_hash, all_modules, metadatas_enhanced)
   table = MarkdownTables.make_table(labels, data)
-  File.open('module_os_matrix_complete.md', 'w') { |file| file.write("#{table}\n") }
+  File.write('module_os_matrix_complete.md', "#{table}\n")
 end
 
 init
