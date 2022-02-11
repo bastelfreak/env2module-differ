@@ -4,5 +4,5 @@ AllCops:
   Exclude:
     - modules/**/*
 
-Metrics/LineLength:
+Layout/LineLength:
   Max: 110
