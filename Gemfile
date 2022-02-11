@@ -9,6 +9,7 @@ gem 'rake'
 group :development do
   gem 'pry'
   gem 'rubocop'
+  gem 'rubocop-rake'
 end
 
 group :r10k do

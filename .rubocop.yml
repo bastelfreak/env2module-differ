@@ -4,5 +4,7 @@ AllCops:
   Exclude:
     - modules/**/*
 
+require: rubocop-rake
+
 Layout/LineLength:
   Max: 110
